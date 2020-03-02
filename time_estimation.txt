@@ -1,0 +1,2 @@
+Upper_detector_count 0Coincidence_count 0
+time=0 hours

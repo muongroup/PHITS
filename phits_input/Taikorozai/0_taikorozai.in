@@ -1,0 +1,218 @@
+
+[Parameters]
+  itall  = 1
+  icntl  = 0
+  infout = 0    $(D=7) About phits.out
+
+  maxcas   =          500000   $ (D=10) number of particles per one batch
+  maxbch   =          10000    $ (D=10) number of batches
+$  rseed=-5
+  nlost=10000
+  nspred=2           $Coulomb Scattering
+  nedisp=1           $Energy Straggling
+  esmax=1e+7
+$ emin(1)  = 1.0e-6 $proton
+$ emin(2)  = 1.0e-9 $neutron
+  emin(6)  = 1.0    $muon
+  emin(7)  = 1.0    $muon
+$emin(12) = 1.0e-3  $electron
+$emin(13) = 1.0e-3  $psitron
+$ emin(14) = 1.0e-6 $photon
+$ emin(15) = 1.0e-6 $Deutron
+$ emin(16) = 1.0e-6 $Triton
+$ emin(17) = 1.0e-6 $He3
+$ emin(18) = 1.0e-6 $He4
+$ emin(19) = 1.0e-6 $nuclie
+
+  dmax(2)  =   20.0
+$ dmax(12) = 1000.0
+$ dmax(13) = 1000.0
+$ dmax(14) = 1000.0
+
+ imucap =0   $muon- capture
+ imuint =0   $
+ imubrm =0   $
+ imuppd =0   $pair production caused by muon
+
+
+   file(6)  = phits.out
+   file(7)  = /usr/local/lib/phits/data/xsdir.jnd  # (D=xdirs) nuclear data input file name
+   file(14) = /usr/local/lib/phits/data/XS288/trxcrd.dat # (D=trxcrd.dat) photon data input file nameデータの参照場所
+# by ATIMA, [Energy Straggling] and [Multiple Coulomb Scattering] off #
+
+
+ ndedx  = 2 $heavy ion, proton is ATIMA23, othrs are NMTC original
+ igchk  = 1 $after across the boundary flight mesh is deltb
+ deltb  =1.0E-5   $ (D=1.d-5) flight mesh after boundary (cm)
+
+$ --- parameter for PARMA sors -----------------------------------------
+$ idam(1) = 29      $ ip,    0:neutron,  29:muon+, 30:muon-, 31:e-, 32:e+, 33:photon, 1-28:H-Ni
+$ idam(2) = -13      $ kf, 2112:neutron, -13:muon+, 13:muon-
+$ rdam(1) = 100  $ sr1
+$ rdam(2) = 100  $ sr2
+$ rdam(3) = 0.0e+0  $ sx0
+$ rdam(4) = 0.0e+0  $ sy0
+$ rdam(5) = 0.0e+0  $ sz0
+$ rdam(6) = 1         $ 1.0e+2  $ emin, (for neutron is 10 meV, for other particle is 10 keV)
+$ rdam(7) = 5.0e+2        $ 1.0e+3  $ emax
+$ rdam(8) =-1.0e+0  $ amin
+$ rdam(9) = 1.0e+0  $ amax
+
+
+[S o u r c e]
+   s-type =   100             # mono-energetic axial source4だとエネルギー分布あり100でusersource
+
+[ M a t e r i a l] $material information is written in /phits
+ mat[30]  1H     -0.023       $concrete 2.302g/cm^3
+          12C     -0.0023
+          16O     -1.22
+         23Na    -0.0368
+         24Mg    -0.005
+         27Al    -0.078
+         28Si    -0.775
+         39K     -0.0299
+         40Ca    -0.1
+         56Fe    -0.032
+
+ mat[1] 56Fe 1
+
+ mat[4]   1H   -0.06 #wood 1.21e-3
+            16O   -0.44
+            12C   -0.50
+
+ mat[2]   14N   4.0586E-05 #Air 1.21e-3
+          16O   1.0800E-05
+          40Ar   2.4255E-07
+
+[ C e l l ]
+
+ 00019  2   -0.00121 -19        $Imitate ImpDet
+ 00020  0            -44 #00019 $void
+ 50     -1            44        $Define not defined space
+
+
+[ S u r f a c e ]
+ $Test target (Taikourozai)
+ 1 BOX     -30.00     -30.00       50.00      60.00       0.00       0.00
+            0.00      60.00       0.00       0.00       0.00      19.50
+
+ $Test target (Iron boad in Taikourozai)
+ 2 BOX     -30.00       0.00       50.00      60.00       0.00       0.00
+            0.00      30.00       0.00       0.00       0.00       1.00
+
+ $ Cylinder(1)
+ 3 RCC 5.00 10.00 63.00 0.00 -20.00 0.00     1.00
+ $ Cylinder(2)
+ 4 RCC 10.00 10.00 63.00 0.00 -20.00 0.00     1.00
+ $ Cylinder(3)
+ 5 RCC -5.00 10.00 56.50 0.00 -20.00 0.00     1.00
+ $ Cylinder(4)
+ 6 RCC -10.00 10.00 56.50 0.00 -20.00 0.00     1.00
+
+ $Dump space (Imitate ImpDet)
+ 19  BOX   -14.40      -14.40     0.00       28.80       0.00       0.00
+            0.00        28.80     0.00       0.00       0.00       0.20
+
+ $Define the world
+ 44 so 300
+ 55 pz -1
+
+[T - C r o s s ]
+   mesh =  reg  $In the case of using dump, we can only use reg_mesh
+    reg =  1
+      r-in       r-out        area
+        00020          00019      179.56
+     part =   muon- muon+           $ define the particles to dump
+   e-type =    2                    $ Liner scale
+       ne =    1                    $ number of bin
+     emin =  0.0
+     emax =  10000000.0
+     unit =    1                    $ unit is [1/cm^2/source]
+     axis =   reg                   $ axis of output
+     file = cross_reg.out  # file name of output for the above axis
+    title = The number of particles [T-Cross] tally
+    gshow =    3            # 0: no 1:bnd, 2:bnd+mat, 3:bnd+reg 4:bnd+lat
+   epsout =    1            # (D=0) generate eps file by ANGEL
+   stdcut =    0.01
+    output= current
+c     dump=-8 #1はkfコード、2、3、4、はxyzそれぞれの座標5,6,7はxyzそれぞれの速度　8はエネルギー
+c     1 2 3 4 5 6 7 8#その順で表示
+
+      dump=7            $dump>0 is binary type, dump<0 is askey type
+      2 3 4 5 6 7 8
+
+[ T - T r a c k ] off
+     mesh =  xyz            # mesh type is xyz scoring mesh
+   x-type =    2            # x-mesh is linear given by xmin, xmax and nx
+       nx =   200            # number of x-mesh points
+     xmin =  -30.           # minimum value of x-mesh points
+     xmax =   30.           # maximum value of x-mesh points
+   y-type =    1            # y-mesh is given by the below data
+       ny =    1            # number of y-mesh points
+           -10.0  10.0
+   z-type =    2            # z-mesh is linear given by zmin, zmax and nz
+       nz =  100            # number of z-mesh points
+     zmin =   0.           # minimum value of z-mesh points
+     zmax =   100.           # maximum value of z-mesh points
+     part =  muon+ muon- all             #どの粒子を見たいか
+   e-type =    2            # e-mesh is given by the below data
+       ne =    1            # number of e-mesh points
+      emin= 0.0
+      emax=1000000.0
+     unit =    1            # unit is [1/cm^2/source]
+     axis =   xz            # axis of output
+     file = track_xz.out  # file name of output for the above axis
+    title = Track Detection using [T-track] tally
+    gshow =    3            # 0: no 1:bnd, 2:bnd+mat, 3:bnd+reg 4:bnd+lat
+   epsout =    1            # (D=0) generate eps file by ANGEL
+
+[ T - T r a c k ] off
+    title = Track Detection in xyz mesh
+     mesh =  xyz            # mesh type is xyz scoring mesh
+   x-type =    2            # x-mesh is linear given by xmin, xmax and nx
+       nx =   200            # number of x-mesh points
+     xmin =  -50.           # minimum value of x-mesh points
+     xmax =   50.           # maximum value of x-mesh points
+   y-type =    2            # y-mesh is linear given by ymin, ymax and ny
+       ny =   200            # number of y-mesh points
+     ymin =  -50.           # minimum value of y-mesh points
+     ymax =   50.           # maximum value of y-mesh points
+   z-type =    2           # z-mesh is given by the below data
+       nz =    10           # number of z-mesh points
+     zmin = 50
+     zmax = 70
+   e-type =    2            # e-mesh is given by the below data
+       ne =    1            # number of e-mesh points
+      emin=  0.0
+      emax=   1000000.0
+     unit =    1            # unit is [1/cm^2/source]
+     axis =   xy            # axis of output
+     file = track_xy.out  # file name of output for the above axis
+     part =  muon+ muon- all
+    gshow =    4            # 0: no 1:bnd, 2:bnd+mat, 3:bnd+reg 4:bnd+lat
+   epsout =    1            # (D=0) generate eps file by ANGEL
+
+[ T - T r a c k ] off
+     mesh =  xyz            # mesh type is xyz scoring mesh
+   x-type =    1            # x-mesh is linear given by xmin, xmax and nx
+       nx =    1            # number of x-mesh points
+           -10.0 1.0
+   y-type =    2            # y-mesh is given by the below data
+       ny =    200
+     ymin =  -50.
+     ymax =   50.
+   z-type =    2 # z-mesh is linear given by zmin, zmax and nz
+       nz =    100            # number of z-mesh points
+     zmin =     0.           # minimum value of z-mesh points
+     zmax =   100.           # maximum value of z-mesh points
+     part =  muon+ muon-              #どの粒子を見たいか
+   e-type =    2            # e-mesh is given by the below data
+       ne =    1            # number of e-mesh points
+      emin= 0.0
+      emax=1000000.0
+     unit =    1            # unit is [1/cm^2/source]
+     axis =   yz            # axis of output
+     file = track_yz.out  # file name of output for the above axis
+    title = Track Detection using [T-track] tally
+    gshow =    3            # 0: no 1:bnd, 2:bnd+mat, 3:bnd+reg 4:bnd+lat
+   epsout =    1

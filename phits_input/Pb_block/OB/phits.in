@@ -1,0 +1,221 @@
+
+[Parameters]
+  itall  = 1
+  icntl  = 0   $3-dshow:11 gshow:8
+  infout = 0    $(D=7) About phits.out
+
+  maxcas   =          1500000   $ (D=10) number of particles per one batch
+  maxbch   =          5000    $ (D=10) number of batches
+$  rseed=-5
+  nlost=10000
+  nspred=2           $Coulomb Scattering
+  nedisp=1           $Energy Straggling
+  esmax=1e+7
+$ emin(1)  = 1.0e-6 $proton
+$ emin(2)  = 1.0e-9 $neutron
+  emin(6)  = 1.0    $muon
+  emin(7)  = 1.0    $muon
+$emin(12) = 1.0e-3  $electron
+$emin(13) = 1.0e-3  $psitron
+$ emin(14) = 1.0e-6 $photon
+$ emin(15) = 1.0e-6 $Deutron
+$ emin(16) = 1.0e-6 $Triton
+$ emin(17) = 1.0e-6 $He3
+$ emin(18) = 1.0e-6 $He4
+$ emin(19) = 1.0e-6 $nuclie
+
+  dmax(2)  =   20.0
+$ dmax(12) = 1000.0
+$ dmax(13) = 1000.0
+$ dmax(14) = 1000.0
+
+ imucap =0   $muon- capture
+ imuint =0   $
+ imubrm =0   $
+ imuppd =0   $pair production caused by muon
+
+$   file(1)  =c:/phits
+   file(6)  = phits.out
+   file(7)  = /usr/local/lib/phits/data/xsdir.jnd  # (D=xdirs) nuclear data input file name
+   file(14) = /usr/local/lib/phits/data/XS288/trxcrd.dat # (D=trxcrd.dat) photon data input file nameデータの参照場所
+# by ATIMA, [Energy Straggling] and [Multiple Coulomb Scattering] off #
+
+
+ ndedx  = 2 $heavy ion, proton is ATIMA23, othrs are NMTC original
+ igchk  = 1 $after across the boundary flight mesh is deltb
+ deltb  =1.0E-5   $ (D=1.d-5) flight mesh after boundary (cm)
+
+$ --- parameter for PARMA sors -----------------------------------------
+$ idam(1) = 29      $ ip,    0:neutron,  29:muon+, 30:muon-, 31:e-, 32:e+, 33:photon, 1-28:H-Ni
+$ idam(2) = -13      $ kf, 2112:neutron, -13:muon+, 13:muon-
+$ rdam(1) = 100  $ sr1
+$ rdam(2) = 100  $ sr2
+$ rdam(3) = 0.0e+0  $ sx0
+$ rdam(4) = 0.0e+0  $ sy0
+$ rdam(5) = 0.0e+0  $ sz0
+$ rdam(6) = 1         $ 1.0e+2  $ emin, (for neutron is 10 meV, for other particle is 10 keV)
+$ rdam(7) = 5.0e+2        $ 1.0e+3  $ emax
+$ rdam(8) =-1.0e+0  $ amin
+$ rdam(9) = 1.0e+0  $ amax
+
+
+[S o u r c e]
+   s-type =   100
+
+[ M a t e r i a l] $material information is written in /phits
+ mat[1]   207Pb  1              #-11.34 g/cm^3
+
+ mat[2]   14N    4.0586E-05 #Air 1.21e-3
+          16O    1.0800E-05
+          40Ar   2.4255E-07
+
+[ C e l l ]
+
+ 00001  1   -11.34   -1 : -2        $Pb block 1
+$00002  1   -11.34   -2         $Pb block 2
+
+ 00019  2   -0.00121 -19        $Imitate ImpDet
+ 00020  0            -44  #00001  #00019  $void
+ 50     -1            44        $Define not defined space
+
+
+[ S u r f a c e ]
+ $Pb block 1
+ 1 BOX     15.00     -15.00      20.00      20.00       0.00       0.00
+            0.00     -20.00       0.00       0.00       0.00      20.00
+
+ $Pb block 2
+ 2 BOX     -15.00     15.00      20.00      15.00       0.00       0.00
+            0.00      15.00       0.00       0.00       0.00      15.00
+
+
+ $Dump space (Imitate ImpDet)
+ 19  BOX   -14.40      -14.40     0.00       28.80       0.00       0.00
+            0.00        28.80     0.00       0.00       0.00        0.20
+
+ $Define the world
+ 44 so 400
+ 55 pz -1
+
+[T - C r o s s ]
+   mesh =  reg  $In the case of using dump, we can only use reg_mesh
+    reg =  1
+      r-in       r-out        area
+        00020          00019      179.56
+     part =   muon- muon+           $ define the particles to dump
+   e-type =    2                    $ Liner scale
+       ne =    1                    $ number of bin
+     emin =  0.0
+     emax =  10000000.0
+     unit =    1                    $ unit is [1/cm^2/source]
+     axis =   reg                   $ axis of output
+     file = cross_reg.out  # file name of output for the above axis
+    title = The number of particles [T-Cross] tally
+    gshow =    3            # 0: no 1:bnd, 2:bnd+mat, 3:bnd+reg 4:bnd+lat
+   epsout =    1            # (D=0) generate eps file by ANGEL
+   stdcut =    0.01
+    output= current
+c     dump=-8 #1はkfコード、2、3、4、はxyzそれぞれの座標5,6,7はxyzそれぞれの速度　8はエネルギー
+c     1 2 3 4 5 6 7 8#その順で表示
+
+      dump=7            $dump>0 is binary type, dump<0 is askey type
+      2 3 4 5 6 7 8
+
+[ T - T r a c k ]off
+     mesh =  xyz            # mesh type is xyz scoring mesh
+   x-type =    2            # x-mesh is linear given by xmin, xmax and nx
+       nx =   200            # number of x-mesh points
+     xmin =  -50.           # minimum value of x-mesh points
+     xmax =   50.           # maximum value of x-mesh points
+   y-type =    1            # y-mesh is given by the below data
+       ny =    1           # number of y-mesh points
+           -20.0  21.0
+   z-type =    2           # z-mesh is linear given by zmin, zmax and nz
+       nz =  100            # number of z-mesh points
+     zmin =   0.           # minimum value of z-mesh points
+     zmax =   100.           # maximum value of z-mesh points
+     part =  muon+ muon- all             #どの粒子を見たいか
+   e-type =    2            # e-mesh is given by the below data
+       ne =    1            # number of e-mesh points
+      emin= 0.0
+      emax=1000000.0
+     unit =    1            # unit is [1/cm^2/source]
+     axis =   xz            # axis of output
+     file = track_xz.out  # file name of output for the above axis
+    title = Track Detection using [T-track] tally
+    gshow =    2            # 0: no 1:bnd, 2:bnd+mat, 3:bnd+reg 4:bnd+lat
+   epsout =    1            # (D=0) generate eps file by ANGEL
+    resol =    5
+
+[ T - T r a c k ]off
+    title = Track Detection in xyz mesh
+     mesh =  xyz            # mesh type is xyz scoring mesh
+   x-type =    2            # x-mesh is linear given by xmin, xmax and nx
+       nx =  200.            # number of x-mesh points
+     xmin =  -100.           # minimum value of x-mesh points
+     xmax =   100.           # maximum value of x-mesh points
+   y-type =    2            # y-mesh is linear given by ymin, ymax and ny
+       ny =  200            # number of y-mesh points
+     ymin =  -100.           # minimum value of y-mesh points
+     ymax =   100.           # maximum value of y-mesh points
+   z-type =    2           # z-mesh is given by the below data
+       nz =    1           # number of z-mesh points
+     zmin =    0
+     zmax =  600
+   e-type =    2            # e-mesh is given by the below data
+       ne =    1            # number of e-mesh points
+      emin=  0.0
+      emax=   1000000.0
+     unit =    1            # unit is [1/cm^2/source]
+     axis =   xy            # axis of output
+     file = track_xy.out  # file name of output for the above axis
+     part =  muon+ muon- all
+    gshow =    2            # 0: no 1:bnd, 2:bnd+mat, 3:bnd+reg 4:bnd+lat
+   epsout =    1            # (D=0) generate eps file by ANGEL
+
+[ T - T r a c k ] off
+     mesh =  xyz            # mesh type is xyz scoring mesh
+   x-type =    1            # x-mesh is linear given by xmin, xmax and nx
+       nx =    1            # number of x-mesh points
+           -10.0 1.0
+   y-type =    2            # y-mesh is given by the below data
+       ny =    200
+     ymin =  -50.
+     ymax =   50.
+   z-type =    2 # z-mesh is linear given by zmin, zmax and nz
+       nz =    100            # number of z-mesh points
+     zmin =     0.           # minimum value of z-mesh points
+     zmax =   100.           # maximum value of z-mesh points
+     part =  muon+ muon-              #どの粒子を見たいか
+   e-type =    2            # e-mesh is given by the below data
+       ne =    1            # number of e-mesh points
+      emin= 0.0
+      emax=1000000.0
+     unit =    1            # unit is [1/cm^2/source]
+     axis =   yz            # axis of output
+     file = track_yz.out  # file name of output for the above axis
+    title = Track Detection using [T-track] tally
+    gshow =    2            # 0: no 1:bnd, 2:bnd+mat, 3:bnd+reg 4:bnd+lat
+   epsout =    1
+
+[ T - 3Dshow ]
+   output =    3            # (D=3) 0:draft, 1:line, 2:col, 3:line+col
+       x0 =  0.             # (D=0.0) x-coordinate of the origin
+       y0 =  0.             # (D=0.0) y-coordinate of the origin
+       z0 =  50.            # (D=0.0) z-coordinate of the origin
+    e-the =   90.           # (D=80.0) eye point theta(degree) from z-axis
+    e-phi =    0.           # (D=140.0) eye point phi(degree) from x-axis
+    e-dst =  120.           # (D=w-dst*10) eye point distance from origin
+    l-the =   90.           # (D=e-the) light point theta from z-axis
+    l-phi =    0.           # (D=e-phi) light point phi from x-axis
+    l-dst =  100.           # (D=e-dst) light point distance from origin
+    w-wdt =   200.           # (D=100) width of window (cm)
+    w-hgt =   100.           # (D=100) hight of window (cm)
+    w-dst =   50.           # (D=200) window distance from origin
+   heaven =   z             # (D=y) direction to heaven
+     line =    1            # (D=0) 0:surface+mat, 1:+region
+   shadow =    2            # (D=0) 0:no, 1:shadow
+    resol =    5       # (D=1) resolution of 3dshow
+     file = 3dshow.out      # file name of output
+    title = Check geometry using [T-3dshow] tally
+   epsout =    1            # (D=0) generate eps file by ANGEL
